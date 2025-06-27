@@ -1,0 +1,54 @@
+{
+  "models": [
+    {
+      "name": "codellama:7b",
+      "display_name": "codellama:7b",
+      "description": "A large language model that can use text prompts to generate and discuss code"
+    },
+    {
+      "name": "deepseek-r1:14b",
+      "display_name": "deepseek-r1:14b",
+      "description": "DeepSeek-R1 is a family of open reasoning models with performance approaching that of leading models, such as O3 and Gemini 2.5 Pro."
+    },
+    {
+      "name": "llama2:latest",
+      "display_name": "Llama 2",
+      "description": "Meta's Llama 2 model for general conversations"
+    },
+    {
+      "name": "llama2:13b",
+      "display_name": "Llama 2 13B",
+      "description": "Larger Llama 2 model with better performance"
+    },
+    {
+      "name": "codellama",
+      "display_name": "Code Llama",
+      "description": "Specialized model for code generation and analysis"
+    },
+    {
+      "name": "mistral",
+      "display_name": "Mistral 7B",
+      "description": "Fast and efficient model for various tasks"
+    },
+    {
+      "name": "neural-chat",
+      "display_name": "Neural Chat",
+      "description": "Optimized for conversational AI"
+    },
+    {
+      "name": "starcode",
+      "display_name": "StarCoder",
+      "description": "Code generation and completion model"
+    },
+    {
+      "name": "vicuna",
+      "display_name": "Vicuna",
+      "description": "Fine-tuned model based on LLaMA"
+    },
+    {
+      "name": "orca-mini",
+      "display_name": "Orca Mini",
+      "description": "Compact model with good performance"
+    }
+  ]
+}
