@@ -3,575 +3,1355 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CodeLlama Web</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
+    <title>Ollama Web Interface</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        body { padding: 20px; background-color: #f8f9fa; }
-        #chat {
-            height: 60vh;
-            overflow-y: auto;
-            margin-bottom: 20px;
-            border: 1px solid #dee2e6;
-            padding: 15px;
-            background-color: white;
-            border-radius: 8px;
-        }
-        .message {
-            margin-bottom: 15px;
-            padding: 15px;
-            border-radius: 8px;
-        }
-        .user-message {
-            background-color: #e9ecef;
-            border-left: 4px solid #0d6efd;
-            margin-right: 15%;
-        }
-        .ai-message {
-            background-color: #ffffff;
-            border-left: 4px solid #6c757d;
-            margin-left: 15%;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-        .message-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-            font-weight: bold;
-        }
-        .message-content {
-            white-space: pre-wrap;
-            word-wrap: break-word;
-        }
-        .code-container {
-            position: relative;
-            margin: 10px 0;
-            border-radius: 6px;
-            overflow: hidden;
-        }
-        .code-header {
-            background-color: #2d2d2d;
-            color: #9cdcfe;
-            padding: 6px 12px;
-            font-family: monospace;
-            font-size: 14px;
-            display: flex;
-            justify-content: space-between;
-        }
-        .code-block {
+        * {
             margin: 0;
-            padding: 12px;
-            background-color: #1e1e1e;
-            color: #d4d4d4;
-            overflow-x: auto;
-            font-family: 'Courier New', monospace;
-            tab-size: 4;
+            padding: 0;
+            box-sizing: border-box;
         }
-        .code-actions {
-            display: flex;
-            gap: 6px;
-        }
-        .btn-code {
-            padding: 0.15rem 0.5rem;
-            font-size: 0.75rem;
-            line-height: 1.2;
-        }
-        .timestamp {
-            font-size: 0.75rem;
-            color: #6c757d;
-            margin-top: 5px;
-            text-align: right;
-        }
-        .toast {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 1000;
-        }
-        pre {
-            margin: 0;
-            white-space: pre;
-        }
-        .input-area {
-            position: relative;
-        }
-        .file-input-label {
-            position: absolute;
-            right: 70px;
-            top: 10px;
-            cursor: pointer;
-        }
-        .file-input {
-            display: none;
-        }
-        .attached-file {
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
             display: flex;
             align-items: center;
-            margin-top: 5px;
-            padding: 5px;
-            background: #f0f0f0;
-            border-radius: 4px;
+            justify-content: center;
+            padding: 20px;
         }
-        .attached-file-name {
-            flex-grow: 1;
-            margin-left: 5px;
-            font-size: 0.9em;
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 900px;
+            overflow: hidden;
         }
-        .remove-file-btn {
-            color: #dc3545;
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .model-selector-section {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .model-dropdown {
+            position: relative;
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .model-select-btn {
+            width: 100%;
+            padding: 12px 16px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
             cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 1em;
+            transition: all 0.3s ease;
         }
-        .model-selector {
-            margin-top: 10px;
+
+        .model-select-btn:hover {
+            border-color: #4facfe;
+        }
+
+        .model-select-btn.active {
+            border-color: #4facfe;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        .selected-model {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .model-dropdown-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            max-height: 400px;
+            overflow-y: auto;
+            display: none;
+            margin-top: 5px;
+        }
+
+        .model-dropdown-menu.show {
+            display: block;
+        }
+
+        .model-option {
+            padding: 12px 16px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .model-option:hover {
+            background: #f8f9fa;
+        }
+
+        .model-option:last-child {
+            border-bottom: none;
+        }
+
+        .model-option.not-installed {
+            opacity: 0.6;
+        }
+
+        .model-info {
+            flex: 1;
+        }
+
+        .model-name {
+            font-weight: 600;
+            margin-bottom: 2px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .model-description {
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        .model-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.7em;
+            font-weight: 600;
+        }
+
+        .installed {
+            background: #4caf50;
+            color: white;
+        }
+
+        .not-installed {
+            background: #ff9800;
+            color: white;
+        }
+
+        .install-btn {
+            background: #4facfe;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 4px 8px;
+            font-size: 0.7em;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .install-btn:hover {
+            background: #3d8bfe;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #f5f5f5;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .chat-section {
+            margin-top: 20px;
+        }
+
+        .section-title {
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chat-container {
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            height: 500px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #fafafa;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            max-width: 85%;
+            word-wrap: break-word;
+            position: relative;
+        }
+
+        .user-message {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            margin-left: auto;
+        }
+
+        .bot-message {
+            background: white;
+            border: 1px solid #e0e0e0;
+            margin-right: auto;
+        }
+
+        .message-actions {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            display: none;
+            gap: 5px;
+        }
+
+        .message:hover .message-actions {
+            display: flex;
+        }
+
+        .action-btn {
+            background: rgba(0, 0, 0, 0.1);
+            border: none;
+            border-radius: 4px;
+            padding: 4px 6px;
+            cursor: pointer;
+            font-size: 0.8em;
+            transition: background 0.2s;
+        }
+
+        .action-btn:hover {
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .bot-message .action-btn {
+            background: rgba(79, 172, 254, 0.1);
+            color: #4facfe;
+        }
+
+        .bot-message .action-btn:hover {
+            background: rgba(79, 172, 254, 0.2);
+        }
+
+        .file-attachment {
+            background: rgba(79, 172, 254, 0.1);
+            border: 1px dashed #4facfe;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+            font-size: 0.9em;
+            color: #4facfe;
+        }
+
+        .chat-input-container {
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .file-input-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+
+        .file-input {
+            position: absolute;
+            left: -9999px;
+        }
+
+        .file-input-label {
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 8px 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+        }
+
+        .file-input-label:hover {
+            background: #e0e0e0;
+        }
+
+        .file-preview {
+            flex: 1;
+            background: rgba(79, 172, 254, 0.1);
+            border: 1px solid #4facfe;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 0.9em;
+            color: #4facfe;
+            display: none;
+        }
+
+        .message-input-row {
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid #e0e0e0;
+            border-radius: 25px;
+            outline: none;
+            font-size: 1em;
+            resize: vertical;
+            min-height: 50px;
+            max-height: 120px;
+        }
+
+        .chat-input:focus {
+            border-color: #4facfe;
+        }
+
+        .send-btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .send-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .export-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .export-menu {
+            display: none;
+            position: absolute;
+            background: white;
+            min-width: 160px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            z-index: 1;
+            top: 100%;
+            left: 0;
+            margin-top: 5px;
+        }
+
+        .export-menu.show {
+            display: block;
+        }
+
+        .export-menu button {
+            background: none;
+            border: none;
+            padding: 12px 16px;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .export-menu button:hover {
+            background: #f5f5f5;
+        }
+
+        .export-menu button:first-child {
+            border-radius: 8px 8px 0 0;
+        }
+
+        .export-menu button:last-child {
+            border-radius: 0 0 8px 8px;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #4facfe;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #c62828;
+        }
+
+        .success {
+            background: #e8f5e8;
+            color: #2e7d32;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #2e7d32;
+        }
+
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 120px;
+            background-color: #555;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -60px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.8em;
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+            }
+
+            .model-selector-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .model-dropdown {
+                min-width: auto;
+            }
+
+            .controls {
+                flex-direction: column;
+            }
+
+            .message {
+                max-width: 95%;
+            }
+
+            .file-input-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1 class="mb-4">CodeLlama Web Interface</h1>
-
-        <div id="chat"></div>
-
-        <div class="input-area">
-            <div class="input-group mb-2">
-                <textarea id="prompt" class="form-control" placeholder="Your message... (Ctrl+Enter for new line)" rows="3"></textarea>
-                <label for="file-input" class="file-input-label btn btn-outline-secondary">
-                    <i class="bi bi-paperclip"></i>
-                </label>
-                <button id="send-btn" class="btn btn-primary">Send</button>
-                <input type="file" id="file-input" class="file-input">
-            </div>
-
-            <div id="file-attachment"></div>
-
-            <div class="d-flex justify-content-between model-selector">
-                <div class="d-flex gap-2">
-                    <button id="new-session" class="btn btn-outline-secondary">New Session</button>
-                    <button id="load-session" class="btn btn-outline-secondary">Load Session</button>
-                </div>
-                <select id="model-select" class="form-select" style="width: auto;">
-                    {% for model in models %}
-                        <option value="{{ model }}" {% if model == default_model %}selected{% endif %}>{{ model }}</option>
-                    {% endfor %}
-                </select>
-            </div>
+        <div class="header">
+            <h1><i class="fas fa-robot"></i> Ollama Web</h1>
+            <p>Local AI Assistant Interface</p>
         </div>
-    </div>
 
-    <div id="toast" class="toast align-items-center text-white bg-success" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="d-flex">
-            <div class="toast-body" id="toast-message"></div>
-            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-    </div>
-
-    <!-- Modal for session selection -->
-    <div class="modal fade" id="sessionModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Load Session</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div id="session-list" class="list-group"></div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/languages/python.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/languages/xml.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const chat = document.getElementById('chat');
-            const promptInput = document.getElementById('prompt');
-            const sendBtn = document.getElementById('send-btn');
-            const modelSelect = document.getElementById('model-select');
-            const fileInput = document.getElementById('file-input');
-            const fileAttachment = document.getElementById('file-attachment');
-            const loadSessionBtn = document.getElementById('load-session');
-            const sessionModal = new bootstrap.Modal('#sessionModal');
-            const toast = new bootstrap.Toast(document.getElementById('toast'));
-
-            let currentFile = null;
-            let currentModel = modelSelect.value;
-            let currentSession = null;
-
-            hljs.highlightAll();
-
-            // Функция для экранирования HTML
-            function escapeHtml(unsafe) {
-                return unsafe
-                    .replace(/&/g, "&amp;")
-                    .replace(/</g, "&lt;")
-                    .replace(/>/g, "&gt;")
-                    .replace(/"/g, "&quot;")
-                    .replace(/'/g, "&#039;");
-            }
-
-            // Функция для обработки и форматирования кода в сообщении
-            function formatContent(content, isUserMessage = false) {
-                if (isUserMessage) {
-                    // Для пользовательских сообщений просто экранируем HTML и сохраняем пробелы
-                    return escapeHtml(content).replace(/\n/g, '<br>');
-                }
-
-                // Для AI сообщений обрабатываем блоки кода
-                let processedContent = content;
-                const codeBlocks = [];
-
-                // Извлекаем блоки кода
-                processedContent = processedContent.replace(/```(\w*)([\s\S]*?)```/g,
-                    function(match, lang, code) {
-                        const id = 'code-' + Date.now() + '-' + codeBlocks.length;
-                        codeBlocks.push({
-                            id: id,
-                            lang: lang || 'plaintext',
-                            code: code.trim()
-                        });
-                        return `<div id="${id}"></div>`;
-                    });
-
-                // Заменяем переносы строк на <br> для обычного текста
-                processedContent = processedContent.replace(/\n/g, '<br>');
-
-                return {
-                    text: processedContent,
-                    codeBlocks: codeBlocks
-                };
-            }
-
-            // Добавление сообщения в чат
-            function addMessage(role, originalContent, modelName = null) {
-                const msgDiv = document.createElement('div');
-                msgDiv.className = `message ${role}-message`;
-
-                const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                const isUserMessage = role === 'user';
-
-                if (isUserMessage) {
-                    // Обработка пользовательского сообщения
-                    const formattedContent = formatContent(originalContent, true);
-
-                    msgDiv.innerHTML = `
-                        <div class="message-header">
-                            <span>You</span>
+        <div class="content">
+            <div class="model-selector-section">
+                <div class="model-dropdown">
+                    <div class="model-select-btn" id="modelSelectBtn" onclick="toggleModelDropdown()">
+                        <div class="selected-model">
+                            <i class="fas fa-brain"></i>
+                            <span id="selectedModelText">Select AI Model</span>
                         </div>
-                        <div class="message-content">${formattedContent}</div>
-                        <div class="timestamp">${time}</div>
-                    `;
-
-                    // Добавляем прикрепленный файл если есть
-                    if (currentFile) {
-                        const fileContent = document.createElement('div');
-                        fileContent.className = 'code-container';
-                        fileContent.innerHTML = `
-                            <div class="code-header">
-                                <span>${currentFile.name}</span>
-                                <div class="code-actions">
-                                    <button class="btn btn-sm btn-outline-secondary btn-code copy-btn">
-                                        <i class="bi bi-clipboard"></i> Copy
-                                    </button>
+                        <i class="fas fa-chevron-down" id="dropdownArrow"></i>
+                    </div>
+                    <div class="model-dropdown-menu" id="modelDropdownMenu">
+                        {% for model in models %}
+                        <div class="model-option {% if not model.installed %}not-installed{% endif %}"
+                             data-model="{{ model.name }}"
+                             onclick="selectModel('{{ model.name }}', '{{ model.display_name }}', {{ model.installed|lower }})">
+                            <div class="model-info">
+                                <div class="model-name">
+                                    <i class="fas fa-microchip"></i>
+                                    {{ model.display_name }}
+                                </div>
+                                <div class="model-description">
+                                    {{ model.description }}
                                 </div>
                             </div>
-                            <pre class="code-block"><code>${escapeHtml(currentFile.content)}</code></pre>
-                        `;
-                        msgDiv.appendChild(fileContent);
-                    }
+                            <div class="model-status">
+                                {% if model.installed %}
+                                    <span class="status-badge installed">
+                                        <i class="fas fa-check"></i> Ready
+                                    </span>
+                                {% else %}
+                                    <span class="status-badge not-installed">
+                                        <i class="fas fa-download"></i> Not Installed
+                                    </span>
+                                    <button class="install-btn" onclick="event.stopPropagation(); pullModel('{{ model.name }}', this)">
+                                        <i class="fas fa-download"></i> Install
+                                    </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="controls">
+                    <button class="btn btn-primary" onclick="refreshModels()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                    <button class="btn btn-secondary" onclick="clearChat()">
+                        <i class="fas fa-trash"></i> Clear
+                    </button>
+                    <div class="export-dropdown">
+                        <button class="btn btn-success" onclick="toggleExportMenu()">
+                            <i class="fas fa-download"></i> Export
+                        </button>
+                        <div class="export-menu" id="exportMenu">
+                            <button onclick="exportChat('txt')">
+                                <i class="fas fa-file-alt"></i> Export as TXT
+                            </button>
+                            <button onclick="exportChat('md')">
+                                <i class="fab fa-markdown"></i> Export as Markdown
+                            </button>
+                            <button onclick="exportChat('json')">
+                                <i class="fas fa-code"></i> Export as JSON
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chat-section">
+                <h2 class="section-title">
+                    <i class="fas fa-comments"></i> Chat
+                </h2>
+
+                <div class="chat-container">
+                    <div class="chat-messages" id="chatMessages">
+                        <div class="message bot-message">
+                            <i class="fas fa-robot" style="margin-right: 8px;"></i>
+                            Welcome! Please select an AI model from the dropdown above and start chatting. You can also attach files to your messages.
+                        </div>
+                    </div>
+
+                    <div class="chat-input-container">
+                        <div class="file-input-container">
+                            <div class="file-input-wrapper">
+                                <input type="file" id="fileInput" class="file-input" onchange="handleFileSelect(event)">
+                                <label for="fileInput" class="file-input-label">
+                                    <i class="fas fa-paperclip"></i> Attach File
+                                </label>
+                            </div>
+                            <div class="file-preview" id="filePreview">
+                                <span id="fileName"></span>
+                                <button type="button" onclick="removeFile()" style="background: none; border: none; color: #4facfe; margin-left: 10px;">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="message-input-row">
+                            <textarea class="chat-input"
+                                     id="messageInput"
+                                     placeholder="Type your message here..."
+                                     onkeypress="handleKeyPress(event)"
+                                     rows="1"></textarea>
+                            <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>AI is thinking...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedModel = null;
+        let chatHistory = [];
+        let selectedFile = null;
+        let allModels = {{ models|tojson }};
+
+        function toggleModelDropdown() {
+            const menu = document.getElementById('modelDropdownMenu');
+            const arrow = document.getElementById('dropdownArrow');
+            const btn = document.getElementById('modelSelectBtn');
+
+            menu.classList.toggle('show');
+            arrow.style.transform = menu.classList.contains('show') ? 'rotate(180deg)' : 'rotate(0deg)';
+            btn.classList.toggle('active', menu.classList.contains('show'));
+        }
+
+        function selectModel(modelName, displayName, isInstalled) {
+            if (!isInstalled) {
+                showError('This model is not installed. Please install it first.');
+                return;
+            }
+
+            selectedModel = modelName;
+            document.getElementById('selectedModelText').textContent = displayName;
+            document.getElementById('modelSelectBtn').classList.remove('active');
+            document.getElementById('modelDropdownMenu').classList.remove('show');
+            document.getElementById('dropdownArrow').style.transform = 'rotate(0deg)';
+
+            showSuccess(`Selected model: ${displayName}`);
+        }
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                selectedFile = file;
+                document.getElementById('fileName').textContent = file.name;
+                document.getElementById('filePreview').style.display = 'block';
+            }
+        }
+
+        function removeFile() {
+            selectedFile = null;
+            document.getElementById('fileInput').value = '';
+            document.getElementById('filePreview').style.display = 'none';
+        }
+
+        function sendMessage() {
+            const messageInput = document.getElementById('messageInput');
+            const message = messageInput.value.trim();
+
+            if (!message) return;
+
+            if (!selectedModel) {
+                showError('Please select a model first');
+                return;
+            }
+
+            // Add user message to chat
+            const userMessage = {
+                type: 'user',
+                content: message,
+                timestamp: new Date().toISOString(),
+                hasFile: !!selectedFile,
+                fileName: selectedFile ? selectedFile.name : null
+            };
+
+            addMessage(message, 'user', selectedFile ? selectedFile.name : null);
+            chatHistory.push(userMessage);
+            messageInput.value = '';
+
+            // Show loading
+            showLoading(true);
+
+            // Prepare form data
+            const formData = new FormData();
+            formData.append('model', selectedModel);
+            formData.append('message', message);
+            if (selectedFile) {
+                formData.append('file', selectedFile);
+            }
+
+            // Send to backend
+            fetch('/chat', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                showLoading(false);
+                if (data.error) {
+                    showError(data.error);
                 } else {
-                    // Обработка AI сообщения
-                    const {text, codeBlocks} = formatContent(originalContent);
-                    const displayName = modelName || currentModel;
-
-                    msgDiv.innerHTML = `
-                        <div class="message-header">
-                            <span>${displayName}</span>
-                        </div>
-                        <div class="message-content">${text}</div>
-                        <div class="timestamp">${time}</div>
-                    `;
-
-                    // Добавляем блоки кода с подсветкой синтаксиса
-                    codeBlocks.forEach(block => {
-                        const placeholder = msgDiv.querySelector('#' + block.id);
-                        if (placeholder) {
-                            const codeContainer = document.createElement('div');
-                            codeContainer.className = 'code-container';
-                            codeContainer.innerHTML = `
-                                <div class="code-header">
-                                    <span>${block.lang}</span>
-                                    <div class="code-actions">
-                                        <button class="btn btn-sm btn-outline-secondary btn-code copy-btn">
-                                            <i class="bi bi-clipboard"></i> Copy
-                                        </button>
-                                        <button class="btn btn-sm btn-outline-primary btn-code save-btn">
-                                            <i class="bi bi-download"></i> Save
-                                        </button>
-                                    </div>
-                                </div>
-                                <pre class="code-block"><code class="language-${block.lang}">${escapeHtml(block.code)}</code></pre>
-                            `;
-                            placeholder.replaceWith(codeContainer);
-                        }
-                    });
-                }
-
-                chat.appendChild(msgDiv);
-                chat.scrollTop = chat.scrollHeight;
-
-                // Подсветка синтаксиса для блоков кода
-                msgDiv.querySelectorAll('pre code').forEach(block => {
-                    hljs.highlightElement(block);
-                });
-
-                // Добавляем обработчики для кнопок копирования/сохранения
-                msgDiv.querySelectorAll('.copy-btn').forEach(btn => {
-                    btn.addEventListener('click', function() {
-                        const codeContainer = this.closest('.code-container');
-                        const code = codeContainer.querySelector('code').textContent;
-                        navigator.clipboard.writeText(code)
-                            .then(() => showToast('Code copied to clipboard!'))
-                            .catch(err => console.error('Failed to copy:', err));
-                    });
-                });
-
-                msgDiv.querySelectorAll('.save-btn').forEach(btn => {
-                    btn.addEventListener('click', function() {
-                        const codeContainer = this.closest('.code-container');
-                        const code = codeContainer.querySelector('code').textContent;
-                        const lang = codeContainer.querySelector('.code-header span').textContent;
-                        const defaultExt = lang === 'python' ? 'py' :
-                                         lang === 'html' ? 'html' :
-                                         lang === 'javascript' ? 'js' : 'txt';
-                        const filename = prompt('Enter filename:', `code.${defaultExt}`);
-                        if (filename) {
-                            saveFile(filename, code);
-                        }
-                    });
-                });
-            }
-
-            function showToast(message) {
-                document.getElementById('toast-message').textContent = message;
-                toast.show();
-            }
-
-            // Отправка сообщения
-            async function sendMessage() {
-                const prompt = promptInput.value.trim();
-                if (!prompt && !currentFile) return;
-
-                currentModel = modelSelect.value;
-                addMessage('user', prompt);
-
-                // Читаем содержимое файла если есть
-                let fileContent = null;
-                if (currentFile) {
-                    fileContent = currentFile.content;
-                }
-
-                // Сбрасываем поле ввода и прикрепленный файл
-                promptInput.value = '';
-                clearFileAttachment();
-
-                try {
-                    const response = await fetch('/api/ask', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            prompt,
-                            model: currentModel,
-                            file_content: fileContent
-                        })
-                    });
-
-                    const data = await response.json();
-                    if (data.error) throw new Error(data.error);
-
-                    addMessage('ai', data.response, data.model);
-                } catch (error) {
-                    addMessage('ai', `Error: ${error.message}`);
-                }
-            }
-
-            // Сохранение файла
-            async function saveFile(filename, content) {
-                try {
-                    const response = await fetch('/api/save', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ filename, content })
-                    });
-
-                    const data = await response.json();
-                    if (data.error) throw new Error(data.error);
-
-                    showToast(`File saved: ${filename}`);
-                } catch (error) {
-                    showToast(`Save failed: ${error.message}`);
-                }
-            }
-
-            // Обработка прикрепления файла
-            fileInput.addEventListener('change', function(e) {
-                const file = e.target.files[0];
-                if (!file) return;
-
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    currentFile = {
-                        name: file.name,
-                        content: e.target.result
+                    const botMessage = {
+                        type: 'bot',
+                        content: data.response,
+                        model: data.model,
+                        timestamp: data.timestamp
                     };
+                    addMessage(data.response, 'bot');
+                    chatHistory.push(botMessage);
+                }
+                // Clear file after sending
+                removeFile();
+            })
+            .catch(error => {
+                showLoading(false);
+                showError('Network error: ' + error.message);
+                removeFile();
+            });
+        }
 
-                    fileAttachment.innerHTML = `
-                        <div class="attached-file">
-                            <i class="bi bi-file-earmark-code"></i>
-                            <span class="attached-file-name">${file.name}</span>
-                            <i class="bi bi-x-lg remove-file-btn" id="remove-file"></i>
+        function addMessage(message, sender, fileName = null) {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}-message`;
+
+            let messageContent = '';
+
+            if (sender === 'bot') {
+                messageContent = `
+                    <div class="message-actions">
+                        <div class="tooltip">
+                            <button class="action-btn" onclick="copyToClipboard(this)">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                            <span class="tooltiptext">Copy</span>
                         </div>
-                    `;
-
-                    document.getElementById('remove-file').addEventListener('click', clearFileAttachment);
-                };
-
-                reader.readAsText(file);
-            });
-
-            function clearFileAttachment() {
-                fileInput.value = '';
-                fileAttachment.innerHTML = '';
-                currentFile = null;
+                    </div>
+                    <i class="fas fa-robot" style="margin-right: 8px;"></i>${message}
+                `;
+            } else {
+                let fileAttachment = '';
+                if (fileName) {
+                    fileAttachment = `<div class="file-attachment">
+                        <i class="fas fa-paperclip"></i> ${fileName}
+                    </div>`;
+                }
+                messageContent = `${fileAttachment}<i class="fas fa-user" style="margin-right: 8px;"></i>${message}`;
             }
 
-            // Загрузка списка сессий
-            function loadSessionsList() {
-                fetch('/api/sessions')
-                    .then(response => response.json())
-                    .then(data => {
-                        const sessionList = document.getElementById('session-list');
-                        sessionList.innerHTML = '';
+            messageDiv.innerHTML = messageContent;
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
 
-                        if (data.sessions && data.sessions.length > 0) {
-                            data.sessions.forEach(session => {
-                                const sessionItem = document.createElement('button');
-                                sessionItem.className = 'list-group-item list-group-item-action';
-                                sessionItem.textContent = session.name;
-                                sessionItem.addEventListener('click', function() {
-                                    loadSession(session.name);
-                                    sessionModal.hide();
-                                });
-                                sessionList.appendChild(sessionItem);
-                            });
-                        } else {
-                            sessionList.innerHTML = '<div class="list-group-item text-muted">No sessions found</div>';
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error loading sessions:', error);
-                        showToast('Error loading sessions');
+        function copyToClipboard(button) {
+            const messageDiv = button.closest('.message');
+            const messageText = messageDiv.textContent.replace(/Copy\s*/, '').trim();
+
+            navigator.clipboard.writeText(messageText).then(() => {
+                // Visual feedback
+                const icon = button.querySelector('i');
+                const originalClass = icon.className;
+                icon.className = 'fas fa-check';
+                button.style.background = 'rgba(76, 175, 80, 0.2)';
+
+                setTimeout(() => {
+                    icon.className = originalClass;
+                    button.style.background = '';
+                }, 1000);
+
+                showSuccess('Message copied to clipboard!');
+            }).catch(err => {
+                showError('Failed to copy message');
+            });
+        }
+
+        function showLoading(show) {
+            const loading = document.getElementById('loading');
+            const sendBtn = document.getElementById('sendBtn');
+
+            if (show) {
+                loading.style.display = 'block';
+                sendBtn.disabled = true;
+            } else {
+                loading.style.display = 'none';
+                sendBtn.disabled = false;
+            }
+        }
+
+        function showError(message) {
+            const chatMessages = document.getElementById('chatMessages');
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error';
+            errorDiv.innerHTML = `<i class="fas fa-exclamation-triangle" style="margin-right: 8px;"></i>${message}`;
+            chatMessages.appendChild(errorDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function showSuccess(message) {
+            const chatMessages = document.getElementById('chatMessages');
+            const successDiv = document.createElement('div');
+            successDiv.className = 'success';
+            successDiv.innerHTML = `<i class="fas fa-check-circle" style="margin-right: 8px;"></i>${message}`;
+            chatMessages.appendChild(successDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            // Auto remove after 3 seconds
+            setTimeout(() => {
+                if (successDiv.parentNode) {
+                    successDiv.parentNode.removeChild(successDiv);
+                }
+            }, 3000);
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+
+        function clearChat() {
+            const chatMessages = document.getElementById('chatMessages');
+            chatMessages.innerHTML = `
+                <div class="message bot-message">
+                    <i class="fas fa-robot" style="margin-right: 8px;"></i>
+                    Chat cleared. Ready for new conversation!
+                </div>
+            `;
+            chatHistory = [];
+            removeFile();
+        }
+
+        function refreshModels() {
+            const refreshBtn = document.querySelector('.btn-primary');
+            const originalText = refreshBtn.innerHTML;
+            refreshBtn.innerHTML = '<div class="spinner" style="width: 16px; height: 16px;"></div> Refreshing...';
+            refreshBtn.disabled = true;
+
+            fetch('/models/refresh', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.models) {
+                    allModels = data.models;
+                    updateModelDropdown(data.models);
+                    showSuccess('Models refreshed successfully!');
+                }
+            })
+            .catch(error => {
+                showError('Failed to refresh models: ' + error.message);
+            })
+            .finally(() => {
+                refreshBtn.innerHTML = originalText;
+                refreshBtn.disabled = false;
+            });
+        }
+
+        function pullModel(modelName, button) {
+            const originalText = button.innerHTML;
+            button.innerHTML = '<div class="spinner" style="width: 10px; height: 10px;"></div>';
+            button.disabled = true;
+
+            fetch('/models/pull', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    model: modelName
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showSuccess(`Model ${modelName} installed successfully!`);
+                    // Refresh models to update status
+
+                    setTimeout(() => refreshModels(), 1000);
+                } else {
+                    showError(data.error || 'Failed to install model');
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                }
+            })
+            .catch(error => {
+                showError('Failed to install model: ' + error.message);
+                button.innerHTML = originalText;
+                button.disabled = false;
+            });
+        }
+
+        function updateModelDropdown(models) {
+            const dropdown = document.getElementById('modelDropdownMenu');
+            dropdown.innerHTML = '';
+
+            models.forEach(model => {
+                const modelOption = document.createElement('div');
+                modelOption.className = `model-option ${!model.installed ? 'not-installed' : ''}`;
+                modelOption.setAttribute('data-model', model.name);
+                modelOption.onclick = () => selectModel(model.name, model.display_name, model.installed);
+
+                const statusBadge = model.installed ?
+                    '<span class="status-badge installed"><i class="fas fa-check"></i> Ready</span>' :
+                    '<span class="status-badge not-installed"><i class="fas fa-download"></i> Not Installed</span>';
+
+                const installButton = !model.installed ?
+                    `<button class="install-btn" onclick="event.stopPropagation(); pullModel('${model.name}', this)">
+                        <i class="fas fa-download"></i> Install
+                     </button>` : '';
+
+                modelOption.innerHTML = `
+                    <div class="model-info">
+                        <div class="model-name">
+                            <i class="fas fa-microchip"></i>
+                            ${model.display_name}
+                        </div>
+                        <div class="model-description">
+                            ${model.description}
+                        </div>
+                    </div>
+                    <div class="model-status">
+                        ${statusBadge}
+                        ${installButton}
+                    </div>
+                `;
+
+                dropdown.appendChild(modelOption);
+            });
+        }
+
+        function toggleExportMenu() {
+            const menu = document.getElementById('exportMenu');
+            menu.classList.toggle('show');
+        }
+
+        function exportChat(format) {
+            if (chatHistory.length === 0) {
+                showError('No chat history to export');
+                return;
+            }
+
+            const exportBtn = document.querySelector('.btn-success');
+            const originalText = exportBtn.innerHTML;
+            exportBtn.innerHTML = '<div class="spinner" style="width: 16px; height: 16px;"></div> Exporting...';
+            exportBtn.disabled = true;
+
+            fetch('/export/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    chat_history: chatHistory,
+                    format: format
+                })
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.blob();
+                } else {
+                    return response.json().then(data => {
+                        throw new Error(data.error || 'Export failed');
                     });
-            }
-
-            // Загрузка сессии
-            function loadSession(name) {
-                fetch('/api/sessions', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'load', name })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.error) throw new Error(data.error);
-
-                    currentSession = name;
-                    chat.innerHTML = '';
-
-                    if (data.history && data.history.length > 0) {
-                        data.history.forEach(item => {
-                            addMessage('user', item.prompt);
-                            addMessage('ai', item.response, item.model);
-                        });
-                    }
-
-                    showToast(`Session "${name}" loaded`);
-                })
-                .catch(error => {
-                    console.error('Error loading session:', error);
-                    showToast(error.message);
-                });
-            }
-
-            // Обработчики событий
-            sendBtn.addEventListener('click', sendMessage);
-
-            promptInput.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter' && e.ctrlKey) {
-                    // Ctrl+Enter - вставка новой строки
-                    const start = this.selectionStart;
-                    const end = this.selectionEnd;
-                    this.value = this.value.substring(0, start) + '\n' + this.value.substring(end);
-                    this.selectionStart = this.selectionEnd = start + 1;
-                    e.preventDefault();
-                } else if (e.key === 'Enter' && !e.shiftKey) {
-                    // Enter - отправка сообщения
-                    e.preventDefault();
-                    sendMessage();
                 }
+            })
+            .then(blob => {
+                // Create download link
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+
+                const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+                a.download = `chat_export_${timestamp}.${format}`;
+
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+
+                showSuccess(`Chat exported as ${format.toUpperCase()} file!`);
+            })
+            .catch(error => {
+                showError('Export failed: ' + error.message);
+            })
+            .finally(() => {
+                exportBtn.innerHTML = originalText;
+                exportBtn.disabled = false;
+                document.getElementById('exportMenu').classList.remove('show');
             });
+        }
 
-            document.getElementById('new-session').addEventListener('click', function() {
-                const name = prompt('Enter session name:');
-                if (name) {
-                    fetch('/api/sessions', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ action: 'new', name })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.error) throw new Error(data.error);
-                        currentSession = name;
-                        chat.innerHTML = '';
-                        showToast(`Session "${name}" created`);
-                    })
-                    .catch(error => showToast(error.message));
-                }
-            });
-
-            loadSessionBtn.addEventListener('click', function() {
-                loadSessionsList();
-                sessionModal.show();
-            });
-
-            document.getElementById('save-chat').addEventListener('click', function() {
-                const messages = Array.from(document.querySelectorAll('.message'))
-                    .map(el => {
-                        const role = el.classList.contains('user-message') ? 'You' : el.querySelector('.message-header span').textContent;
-                        const content = el.querySelector('.message-content').textContent;
-                        const time = el.querySelector('.timestamp').textContent;
-                        return `[${time}] ${role}: ${content}`;
-                    })
-                    .join('\n\n');
-
-                if (!messages.trim()) {
-                    showToast('No content to save');
-                    return;
-                }
-
-                const filename = prompt('Enter filename:', 'chat_log.txt');
-                if (filename) {
-                    saveFile(filename, messages);
-                }
-            });
+        // Auto-resize textarea
+        document.getElementById('messageInput').addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 120) + 'px';
         });
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function(event) {
+            const modelDropdown = document.querySelector('.model-dropdown');
+            const exportDropdown = document.querySelector('.export-dropdown');
+
+            if (!modelDropdown.contains(event.target)) {
+                document.getElementById('modelDropdownMenu').classList.remove('show');
+                document.getElementById('modelSelectBtn').classList.remove('active');
+                document.getElementById('dropdownArrow').style.transform = 'rotate(0deg)';
+            }
+
+            if (!exportDropdown.contains(event.target)) {
+                document.getElementById('exportMenu').classList.remove('show');
+            }
+        });
+
+        // Auto-select first installed model on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const firstInstalledModel = allModels.find(model => model.installed);
+            if (firstInstalledModel) {
+                selectModel(firstInstalledModel.name, firstInstalledModel.display_name, true);
+            }
+        });
+
+        // Drag and drop file support
+        const chatContainer = document.querySelector('.chat-input-container');
+
+        chatContainer.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.style.background = 'rgba(79, 172, 254, 0.1)';
+            this.style.borderColor = '#4facfe';
+        });
+
+        chatContainer.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.style.background = '';
+            this.style.borderColor = '';
+        });
+
+        chatContainer.addEventListener('drop', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.style.background = '';
+            this.style.borderColor = '';
+
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                const file = files[0];
+                selectedFile = file;
+                document.getElementById('fileName').textContent = file.name;
+                document.getElementById('filePreview').style.display = 'block';
+
+                // Update file input
+                const fileInput = document.getElementById('fileInput');
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                fileInput.files = dataTransfer.files;
+
+                showSuccess(`File "${file.name}" attached successfully!`);
+            }
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(event) {
+            // Ctrl/Cmd + K to focus model selector
+            if ((event.ctrlKey || event.metaKey) && event.key === 'k') {
+                event.preventDefault();
+                toggleModelDropdown();
+            }
+
+            // Ctrl/Cmd + L to clear chat
+            if ((event.ctrlKey || event.metaKey) && event.key === 'l') {
+                event.preventDefault();
+                clearChat();
+            }
+
+            // Escape to close dropdowns
+            if (event.key === 'Escape') {
+                document.getElementById('modelDropdownMenu').classList.remove('show');
+                document.getElementById('exportMenu').classList.remove('show');
+                document.getElementById('modelSelectBtn').classList.remove('active');
+                document.getElementById('dropdownArrow').style.transform = 'rotate(0deg)';
+            }
+        });
+
+        // Add loading animation for better UX
+        function addTypingIndicator() {
+            const chatMessages = document.getElementById('chatMessages');
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'message bot-message typing-indicator';
+            typingDiv.id = 'typingIndicator';
+            typingDiv.innerHTML = `
+                <i class="fas fa-robot" style="margin-right: 8px;"></i>
+                <div class="typing-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            `;
+            chatMessages.appendChild(typingDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function removeTypingIndicator() {
+            const typingIndicator = document.getElementById('typingIndicator');
+            if (typingIndicator) {
+                typingIndicator.remove();
+            }
+        }
+
+        // Update sendMessage function to use typing indicator
+        const originalSendMessage = sendMessage;
+        sendMessage = function() {
+            const messageInput = document.getElementById('messageInput');
+            const message = messageInput.value.trim();
+
+            if (!message) return;
+
+            if (!selectedModel) {
+                showError('Please select a model first');
+                return;
+            }
+
+            // Add user message to chat
+            const userMessage = {
+                type: 'user',
+                content: message,
+                timestamp: new Date().toISOString(),
+                hasFile: !!selectedFile,
+                fileName: selectedFile ? selectedFile.name : null
+            };
+
+            addMessage(message, 'user', selectedFile ? selectedFile.name : null);
+            chatHistory.push(userMessage);
+            messageInput.value = '';
+            messageInput.style.height = 'auto';
+
+            // Show loading and typing indicator
+            showLoading(true);
+            addTypingIndicator();
+
+            // Prepare form data
+            const formData = new FormData();
+            formData.append('model', selectedModel);
+            formData.append('message', message);
+            if (selectedFile) {
+                formData.append('file', selectedFile);
+            }
+
+            // Send to backend
+            fetch('/chat', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                showLoading(false);
+                removeTypingIndicator();
+
+                if (data.error) {
+                    showError(data.error);
+                } else {
+                    const botMessage = {
+                        type: 'bot',
+                        content: data.response,
+                        model: data.model,
+                        timestamp: data.timestamp
+                    };
+                    addMessage(data.response, 'bot');
+                    chatHistory.push(botMessage);
+                }
+                // Clear file after sending
+                removeFile();
+            })
+            .catch(error => {
+                showLoading(false);
+                removeTypingIndicator();
+                showError('Network error: ' + error.message);
+                removeFile();
+            });
+        };
     </script>
+
+    <style>
+        /* Additional styles for typing indicator */
+        .typing-indicator {
+            opacity: 0.7;
+        }
+
+        .typing-dots {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .typing-dots span {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #4facfe;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+
+        .typing-dots span:nth-child(1) {
+            animation-delay: -0.32s;
+        }
+
+        .typing-dots span:nth-child(2) {
+            animation-delay: -0.16s;
+        }
+
+        @keyframes typing {
+            0%, 80%, 100% {
+                transform: scale(0.8);
+                opacity: 0.5;
+            }
+            40% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* Smooth transitions */
+        .model-select-btn, .model-option, .btn {
+            transition: all 0.3s ease;
+        }
+
+        /* Better scrollbar for chat */
+        .chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+
+        /* Model dropdown scrollbar */
+        .model-dropdown-menu::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .model-dropdown-menu::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+
+        .model-dropdown-menu::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+    </style>
 </body>
 </html>
